@@ -1,0 +1,227 @@
+---
+config:
+  flowchart:
+    nodeSpacing: 50
+    rankSpacing: 70
+---
+flowchart TB
+
+%% =========================================================
+%% Simulation data model
+%% BAM masterdata hierarchy + PMDco 3.1.1 alignment
+%%
+%% Solid arrows: schema inheritance.
+%% Dotted arrows: semantic relationships between instances.
+%%
+%% Ontology identifiers indicate intended alignments.
+%% Schema inheritance is not automatically an OWL subclass axiom.
+%% No owl:equivalentClass assertions are implied.
+%%
+%% Only completed computational executions are in scope.
+%% =========================================================
+
+    %% =====================================================
+    %% ROOT
+    %% =====================================================
+
+    Root["<b>Root / Thing / Entity</b><br>openBIS: ENTRY<br><br>name, description<br>external_identifiers<br>external_references<br>ontology_iri, hash, prev_permID<br><br>Ontology anchor: BFO_0000001 entity"]:::base
+
+    %% =====================================================
+    %% ACTIVITY HIERARCHY (occurrent side)
+    %% =====================================================
+
+    Activity["<b>Activity</b><br>Ontology alignment:<br>BFO_0000015 process<br>an occurrent"]:::base
+
+    Computation["<b>Computation</b><br>Completed computing processes:<br>PMD_0000583 computing process"]:::base
+
+    Experiment["<b>Experiment</b><br>Experimental activities"]:::base
+
+    Root --> Activity
+    Activity --> Computation
+    Activity --> Experiment
+
+    %% =====================================================
+    %% ENTITY / CONTEXT HIERARCHY (continuant side)
+    %% =====================================================
+
+    EntityBase["<b>Entity</b><br>Ontology alignment:<br>BFO_0000002 continuant<br>groups all non-activity entries:<br>information entities and material entities"]:::base
+
+    Context["<b>Context</b><br>Ontology alignment:<br>IAO_0000030<br>information content entity"]:::base
+
+    ParameterSet["<b>ParameterSet</b><br>Configuration parameters"]:::base
+
+    Root --> EntityBase
+    EntityBase --> Context
+    Context --> ParameterSet
+
+    %% =====================================================
+    %% MATERIAL ENTITY
+    %% =====================================================
+
+    MatEnt["<b>material entity</b><br>BFO_0000040<br>independent continuant"]:::upper
+
+    EntityBase --> MatEnt
+
+    %% =====================================================
+    %% COMPUTATIONAL PROCESSES
+    %% =====================================================
+
+    Simulation["<b>Simulation</b><br>Local subclass of:<br>PMD_0000933 simulation process<br>openBIS: SIMULATION<br><br>calculation_type<br>walltime, n_cores, job_id<br>electronic / ionic converged<br>where applicable"]:::local
+
+    Analysis["<b>Analysis</b><br>Local subclass of:<br>PMD_0000583 computing process<br>openBIS: COMPUTATIONAL_ANALYSIS"]:::local
+
+    WorkflowRun["<b>WorkflowRun</b><br>Local subclass of:<br>PMD_0000016 workflow run<br>e.g. a pyiron job chain"]:::local
+
+    Computation --> Simulation
+    Computation --> Analysis
+    Computation --> WorkflowRun
+
+    %% =====================================================
+    %% COMPUTATIONAL METHOD
+    %% =====================================================
+
+    Method["<b>ComputationalMethod</b><br>Local subclass of:<br>PMD_0000931<br>simulation method specification<br>openBIS: SIMULATION_METHOD"]:::local
+
+    DFT["<b>DFT</b><br>DFT method specification<br><br>xc_functional<br>spin settings<br>relativistic settings, including SOC<br>hubbard_parameters<br>dispersion_correction"]:::local
+
+    Context --> Method
+    Method --> DFT
+
+    %% =====================================================
+    %% SIMULATION SETTINGS
+    %% =====================================================
+
+    SimSettings["<b>SimulationSettings</b><br>Local subclass of:<br>IAO_0000033<br>directive information entity<br><br>basis set + cutoff<br>k-point mesh<br>smearing<br>electronic / geometry solver<br>MD: ensemble, timestep, temperature"]:::section
+
+    ParameterSet --> SimSettings
+
+    %% =====================================================
+    %% SOFTWARE AND WORKFLOW SPECIFICATIONS
+    %% =====================================================
+
+    Software["<b>Software</b><br>Local subclass of:<br>IAO_0000010 software<br>openBIS: SOFTWARE_CODE<br><br>name, version"]:::local
+
+    WorkflowDef["<b>WorkflowDefinition</b><br>Local subclass of:<br>PMD_0000012 workflow definition"]:::local
+
+    Context --> Software
+    Context --> WorkflowDef
+
+    %% =====================================================
+    %% SIMULATED SYSTEM
+    %% =====================================================
+
+    SimSystem["<b>SimulatedSystem</b><br>Local subclass of:<br>IAO_0000030 information content entity<br>openBIS: SIMULATED_SYSTEM<br><br>type, n_atoms, charge, formula<br>simulation cell<br>structure file: MAT_SIM_STRUCTURE"]:::local
+
+    Context --> SimSystem
+
+    %% =====================================================
+    %% SCIENTIFIC INPUT SPECIFICATIONS
+    %% =====================================================
+
+    Pseudo["<b>Pseudopotential</b><br>Selected pseudopotential / PAW dataset<br>Local subclass of:<br>IAO_0000030<br>openBIS: PSEUDOPOTENTIAL"]:::local
+
+    Interatomic["<b>InteratomicPotential</b><br>Selected interatomic potential specification<br>Local subclass of:<br>IAO_0000030<br>openBIS: INTERATOMIC_POTENTIAL"]:::local
+
+    Context --> Pseudo
+    Context --> Interatomic
+
+    %% =====================================================
+    %% CALCULATED RESULTS
+    %% =====================================================
+
+    CalcProp["<b>CalculatedProperty</b><br>Local subclass of:<br>IAO_0000027 data entity<br>openBIS: CALCULATED_PROPERTIES<br><br>quantity: energy | pressure | volume | max force<br>value + unit<br>state / frame or interval reference<br>aggregation: none | mean | maximum | ...<br>quantity convention, where relevant"]:::local
+
+    ValueSpec["<b>qudt scalar quantity value</b><br>PMD_0080205<br>number + QUDT unit"]:::upper
+
+    Context --> CalcProp
+    Context --> ValueSpec
+
+    %% =====================================================
+    %% PHYSICAL ENTITIES
+    %% =====================================================
+
+    Material["<b>material</b><br>PMD_0000000"]:::upper
+
+    HPC["<b>HPC</b><br>Local subclass of:<br>PMD_0000582 computing device<br>openBIS: HPC"]:::local
+
+    MatEnt --> Material
+    MatEnt --> HPC
+
+    %% =====================================================
+    %% CALCULATION TYPE VOCABULARY
+    %% =====================================================
+
+    CalcType["<b>ATOMISTIC_CALC_TYPE</b><br>openBIS vocabulary<br><br>STRUC_OPT: PMD_0000956<br>structural optimization simulation<br>MC: PMD_0000862 Monte Carlo simulation<br>MD: PMD_0000504 ab initio MD or<br>PMD_0000631 empirical potential MD<br>SC: PMD_0000933 simulation process<br><br>PMDco classifications apply only<br>when their definitions are satisfied"]:::vocab
+
+    %% =====================================================
+    %% SEMANTIC RELATIONS: SIMULATION
+    %% =====================================================
+
+    %% Input and output may be different system instances.
+
+    Simulation -. "has specified input<br>OBI_0000293<br>input system" .-> SimSystem
+
+    Simulation -. "has specified output<br>OBI_0000299<br>output system" .-> SimSystem
+
+    %% Scientific inputs.
+
+    Simulation -. "has specified input<br>OBI_0000293" .-> Pseudo
+
+    Simulation -. "has specified input<br>OBI_0000293" .-> Interatomic
+
+    %% Scientific results.
+
+    Simulation -. "has specified output<br>OBI_0000299" .-> CalcProp
+
+    %% Specifications.
+
+    Simulation -. "concretizes<br>RO_0000059" .-> Method
+
+    Simulation -. "concretizes<br>RO_0000059" .-> SimSettings
+
+    Simulation -. "concretizes<br>RO_0000059" .-> Software
+
+    %% Physical computing resources.
+
+    HPC -. "has specified input<br>OBI_0000293" .-> Simulation
+
+    Simulation -. "has participant<br>RO_0000057" .-> HPC
+
+    %% Workflow.
+
+    Simulation -. "part of<br>BFO_0000050" .-> WorkflowRun
+
+    WorkflowRun -. "concretizes<br>RO_0000059" .-> WorkflowDef
+
+    %% Calculation classification.
+
+    Simulation -. "calculation_type<br>local vocabulary field" .-> CalcType
+
+    %% =====================================================
+    %% SEMANTIC RELATIONS: RESULTS AND SYSTEMS
+    %% =====================================================
+
+    CalcProp -. "is about<br>IAO_0000136" .-> SimSystem
+
+    CalcProp -. "has value specification<br>OBI_0001938" .-> ValueSpec
+
+    %% Optional correspondence to an actual physical sample.
+
+    SimSystem -. "is about, optional<br>IAO_0000136<br>specific real sample" .-> Material
+
+    %% =====================================================
+    %% LEGEND
+    %% =====================================================
+
+    Note["<b>How to read</b><br><br>Grey filled: shared schema classes<br>Grey outlined: reused ontology classes<br>Blue: local simulation-model classes<br>Green: settings stored as property sections<br>Purple: openBIS vocabulary<br><br>Solid arrows: schema inheritance<br>Dotted arrows: semantic relations or associations<br><br>Ontology identifiers indicate alignments,<br>not automatic OWL equivalence axioms.<br><br>Activity = occurrent side, Entity = continuant side.<br>Simulation belongs to the Activity branch.<br>Only completed runs are in scope."]:::note
+
+    %% =====================================================
+    %% STYLES
+    %% =====================================================
+
+    classDef base fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#111827
+    classDef upper fill:#ffffff,stroke:#9ca3af,stroke-width:2px,color:#374151
+    classDef local fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a
+    classDef section fill:#ecfdf5,stroke:#059669,stroke-dasharray:4 2,color:#0f172a
+    classDef vocab fill:#f5f3ff,stroke:#7c3aed,color:#0f172a
+    classDef note fill:#ffffff,stroke:#9ca3af,color:#374151
