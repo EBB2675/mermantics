@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mermantics"
+dynamic = ["version"]
+description = "Check Mermaid data-model diagrams against an OWL ontology (e.g. PMDco) with a reasoner"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["rdflib>=7.0"]
+keywords = ["mermaid", "owl", "ontology", "reasoner", "data model", "pmdco", "bfo"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Topic :: Scientific/Engineering",
+  "Intended Audience :: Science/Research",
+]
+# license: to be decided
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+mermantics = "mermantics.cli:main"
+
+[tool.hatch.version]
+path = "src/mermantics/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mermantics"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+markers = [
+  "reasoner: needs Java and ROBOT; skipped when they are not available",
+  "pmdco: needs PMDco 3.1.1 (set PMDCO_FILE or allow a download); slow, about 40 s per test",
+]
