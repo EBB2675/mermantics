@@ -1,0 +1,24 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+
+# A tiny ontology for fast tests. IDs use the made-up prefix TST.
+<http://example.org/tiny> a owl:Ontology .
+
+obo:TST_0000001 a owl:Class ; rdfs:label "process"@en .
+obo:TST_0000002 a owl:Class ; rdfs:label "object"@en ; owl:disjointWith obo:TST_0000001 .
+obo:TST_0000003 a owl:Class ; rdfs:label "computation"@en ; rdfs:subClassOf obo:TST_0000001 .
+obo:TST_0000004 a owl:Class ; rdfs:label "obsolete thing"@en ; owl:deprecated true .
+obo:TST_0000005 a owl:Class ; rdfs:label "fast computation"@en ; rdfs:subClassOf obo:TST_0000003 .
+obo:TST_0000006 a owl:Class ; rdfs:label "machine"@en ; rdfs:subClassOf obo:TST_0000002 .
+
+obo:TST_0000010 a owl:ObjectProperty ; rdfs:label "has input"@en ;
+    rdfs:domain obo:TST_0000001 ; rdfs:range obo:TST_0000002 .
+obo:TST_0000011 a owl:AnnotationProperty ; rdfs:label "comment"@en .
+obo:TST_0000012 a owl:ObjectProperty ; rdfs:label "runs on"@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( obo:TST_0000001 obo:TST_0000002 ) ] .
+obo:TST_0000013 a owl:ObjectProperty ; rdfs:label "related to"@en .
+obo:TST_0000014 a owl:ObjectProperty ; rdfs:label "has main input"@en ; rdfs:subPropertyOf obo:TST_0000010 .
+obo:TST_0000015 a owl:ObjectProperty ; rdfs:label "main input of"@en ; owl:inverseOf obo:TST_0000014 .
+obo:TST_0000016 a owl:ObjectProperty ; rdfs:label "made by"@en ;
+    rdfs:range [ a owl:Restriction ; owl:onProperty obo:TST_0000010 ; owl:someValuesFrom obo:TST_0000002 ] .
