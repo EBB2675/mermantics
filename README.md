@@ -1,4 +1,4 @@
-<p align="center">
+<p align="left">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="assets/mermantics-logo-dark.svg">
     <img src="assets/mermantics-logo.svg" alt="mermantics" width="420">
