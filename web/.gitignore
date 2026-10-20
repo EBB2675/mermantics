@@ -1,0 +1,6 @@
+node_modules/
+dist/
+# PMDco and other downloads for the tests (npm run fetch-pmdco)
+.cache/
+# Python environment for the reference CLI (pip install -e ..)
+.venv/
