@@ -1,0 +1,271 @@
+@prefix diagram: <http://example.org/diagram#> .
+@prefix ns1: <http://purl.obolibrary.org/obo/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/diagram> a owl:Ontology .
+
+diagram:Activity_example a diagram:Activity,
+        owl:NamedIndividual ;
+    rdfs:label "Activity (example)" .
+
+diagram:Analysis_example a diagram:Analysis,
+        owl:NamedIndividual ;
+    rdfs:label "Analysis (example)" .
+
+diagram:Computation_example a diagram:Computation,
+        owl:NamedIndividual ;
+    rdfs:label "Computation (example)" .
+
+diagram:Context_example a diagram:Context,
+        owl:NamedIndividual ;
+    rdfs:label "Context (example)" .
+
+diagram:DFT_example a diagram:DFT,
+        owl:NamedIndividual ;
+    rdfs:label "DFT (example)" .
+
+diagram:EntityBase_example a diagram:EntityBase,
+        owl:NamedIndividual ;
+    rdfs:label "Entity (example)" .
+
+diagram:Experiment_example a diagram:Experiment,
+        owl:NamedIndividual ;
+    rdfs:label "Experiment (example)" .
+
+diagram:MatEnt_example a diagram:MatEnt,
+        owl:NamedIndividual ;
+    rdfs:label "material entity (example)" .
+
+diagram:ParameterSet_example a diagram:ParameterSet,
+        owl:NamedIndividual ;
+    rdfs:label "ParameterSet (example)" .
+
+diagram:Root_example a diagram:Root,
+        owl:NamedIndividual ;
+    rdfs:label "Root / Thing / Entity (example)" .
+
+ns1:BFO_0000050 a owl:ObjectProperty .
+
+ns1:IAO_0000136 a owl:ObjectProperty .
+
+ns1:OBI_0000293 a owl:ObjectProperty .
+
+ns1:OBI_0000299 a owl:ObjectProperty .
+
+ns1:OBI_0001938 a owl:ObjectProperty .
+
+ns1:RO_0000057 a owl:ObjectProperty .
+
+ns1:RO_0000059 a owl:ObjectProperty .
+
+diagram:Analysis a owl:Class ;
+    rdfs:label "Analysis" ;
+    rdfs:subClassOf diagram:Computation,
+        <https://w3id.org/pmd/co/PMD_0000583> .
+
+diagram:CalcProp a owl:Class ;
+    rdfs:label "CalculatedProperty" ;
+    rdfs:subClassOf diagram:Context,
+        ns1:IAO_0000027 .
+
+diagram:CalcProp_example a diagram:CalcProp,
+        owl:NamedIndividual ;
+    rdfs:label "CalculatedProperty (example)" ;
+    ns1:IAO_0000136 diagram:SimSystem_example ;
+    ns1:OBI_0001938 diagram:ValueSpec_example .
+
+diagram:DFT a owl:Class ;
+    rdfs:label "DFT" ;
+    rdfs:subClassOf diagram:Method .
+
+diagram:Experiment a owl:Class ;
+    rdfs:label "Experiment" ;
+    rdfs:subClassOf diagram:Activity .
+
+diagram:HPC a owl:Class ;
+    rdfs:label "HPC" ;
+    rdfs:subClassOf diagram:MatEnt,
+        <https://w3id.org/pmd/co/PMD_0000582> .
+
+diagram:HPC_example a diagram:HPC,
+        owl:NamedIndividual ;
+    rdfs:label "HPC (example)" ;
+    ns1:OBI_0000293 diagram:Simulation_example .
+
+diagram:Interatomic a owl:Class ;
+    rdfs:label "InteratomicPotential" ;
+    rdfs:subClassOf diagram:Context,
+        ns1:IAO_0000030 .
+
+diagram:Interatomic_example a diagram:Interatomic,
+        owl:NamedIndividual ;
+    rdfs:label "InteratomicPotential (example)" .
+
+diagram:Material a owl:Class ;
+    rdfs:label "material" ;
+    rdfs:subClassOf diagram:MatEnt,
+        <https://w3id.org/pmd/co/PMD_0000000> .
+
+diagram:Material_example a diagram:Material,
+        owl:NamedIndividual ;
+    rdfs:label "material (example)" .
+
+diagram:Method_example a diagram:Method,
+        owl:NamedIndividual ;
+    rdfs:label "ComputationalMethod (example)" .
+
+diagram:Pseudo a owl:Class ;
+    rdfs:label "Pseudopotential" ;
+    rdfs:subClassOf diagram:Context,
+        ns1:IAO_0000030 .
+
+diagram:Pseudo_example a diagram:Pseudo,
+        owl:NamedIndividual ;
+    rdfs:label "Pseudopotential (example)" .
+
+diagram:SimSettings a owl:Class ;
+    rdfs:label "SimulationSettings" ;
+    rdfs:subClassOf diagram:ParameterSet,
+        ns1:IAO_0000033 .
+
+diagram:SimSettings_example a diagram:SimSettings,
+        owl:NamedIndividual ;
+    rdfs:label "SimulationSettings (example)" .
+
+diagram:SimSystem a owl:Class ;
+    rdfs:label "SimulatedSystem" ;
+    rdfs:subClassOf diagram:Context,
+        ns1:IAO_0000030 .
+
+diagram:Simulation a owl:Class ;
+    rdfs:label "Simulation" ;
+    rdfs:subClassOf diagram:Computation,
+        <https://w3id.org/pmd/co/PMD_0000933> .
+
+diagram:Simulation_example a diagram:Simulation,
+        owl:NamedIndividual ;
+    rdfs:label "Simulation (example)" ;
+    ns1:BFO_0000050 diagram:WorkflowRun_example ;
+    ns1:OBI_0000293 diagram:Interatomic_example,
+        diagram:Pseudo_example,
+        diagram:SimSystem_example ;
+    ns1:OBI_0000299 diagram:CalcProp_example,
+        diagram:SimSystem_example ;
+    ns1:RO_0000057 diagram:HPC_example ;
+    ns1:RO_0000059 diagram:Method_example,
+        diagram:SimSettings_example,
+        diagram:Software_example .
+
+diagram:Software a owl:Class ;
+    rdfs:label "Software" ;
+    rdfs:subClassOf diagram:Context,
+        ns1:IAO_0000010 .
+
+diagram:Software_example a diagram:Software,
+        owl:NamedIndividual ;
+    rdfs:label "Software (example)" .
+
+diagram:ValueSpec a owl:Class ;
+    rdfs:label "qudt scalar quantity value" ;
+    rdfs:subClassOf diagram:Context,
+        <https://w3id.org/pmd/co/PMD_0080205> .
+
+diagram:ValueSpec_example a diagram:ValueSpec,
+        owl:NamedIndividual ;
+    rdfs:label "qudt scalar quantity value (example)" .
+
+diagram:WorkflowDef a owl:Class ;
+    rdfs:label "WorkflowDefinition" ;
+    rdfs:subClassOf diagram:Context,
+        <https://w3id.org/pmd/co/PMD_0000012> .
+
+diagram:WorkflowDef_example a diagram:WorkflowDef,
+        owl:NamedIndividual ;
+    rdfs:label "WorkflowDefinition (example)" .
+
+diagram:WorkflowRun a owl:Class ;
+    rdfs:label "WorkflowRun" ;
+    rdfs:subClassOf diagram:Computation,
+        <https://w3id.org/pmd/co/PMD_0000016> .
+
+diagram:WorkflowRun_example a diagram:WorkflowRun,
+        owl:NamedIndividual ;
+    rdfs:label "WorkflowRun (example)" ;
+    ns1:RO_0000059 diagram:WorkflowDef_example .
+
+ns1:BFO_0000001 a owl:Class .
+
+ns1:BFO_0000002 a owl:Class .
+
+ns1:BFO_0000015 a owl:Class .
+
+ns1:BFO_0000040 a owl:Class .
+
+ns1:IAO_0000010 a owl:Class .
+
+ns1:IAO_0000027 a owl:Class .
+
+ns1:IAO_0000033 a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000000> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000012> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000016> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000582> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000931> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0000933> a owl:Class .
+
+<https://w3id.org/pmd/co/PMD_0080205> a owl:Class .
+
+diagram:Method a owl:Class ;
+    rdfs:label "ComputationalMethod" ;
+    rdfs:subClassOf diagram:Context,
+        <https://w3id.org/pmd/co/PMD_0000931> .
+
+diagram:ParameterSet a owl:Class ;
+    rdfs:label "ParameterSet" ;
+    rdfs:subClassOf diagram:Context .
+
+<https://w3id.org/pmd/co/PMD_0000583> a owl:Class .
+
+diagram:Activity a owl:Class ;
+    rdfs:label "Activity" ;
+    rdfs:subClassOf diagram:Root,
+        ns1:BFO_0000015 .
+
+diagram:EntityBase a owl:Class ;
+    rdfs:label "Entity" ;
+    rdfs:subClassOf diagram:Root,
+        ns1:BFO_0000002 .
+
+diagram:MatEnt a owl:Class ;
+    rdfs:label "material entity" ;
+    rdfs:subClassOf diagram:EntityBase,
+        ns1:BFO_0000040 .
+
+diagram:Root a owl:Class ;
+    rdfs:label "Root / Thing / Entity" ;
+    rdfs:subClassOf ns1:BFO_0000001 .
+
+diagram:SimSystem_example a diagram:SimSystem,
+        owl:NamedIndividual ;
+    rdfs:label "SimulatedSystem (example)" ;
+    ns1:IAO_0000136 diagram:Material_example .
+
+diagram:Computation a owl:Class ;
+    rdfs:label "Computation" ;
+    rdfs:subClassOf diagram:Activity,
+        <https://w3id.org/pmd/co/PMD_0000583> .
+
+ns1:IAO_0000030 a owl:Class .
+
+diagram:Context a owl:Class ;
+    rdfs:label "Context" ;
+    rdfs:subClassOf diagram:EntityBase,
+        ns1:IAO_0000030 .
+

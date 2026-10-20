@@ -1,0 +1,97 @@
+{
+  "diagram": "broken-b-impossible-class.mmd",
+  "passed": true,
+  "counts": {
+    "error": 0,
+    "warning": 2,
+    "note": 5,
+    "ok": 4
+  },
+  "info": {
+    "boxes": 23,
+    "arrows": 37,
+    "ontology_files": [
+      ".cache/pmdco-full-3.1.1.ttl"
+    ],
+    "reasoner": null
+  },
+  "findings": [
+    {
+      "level": "note",
+      "check": "ids",
+      "where": "arrow Simulation -> CalcType (line 196)",
+      "message": "arrow has no ontology ID, not checked (calculation_type local vocabulary field)",
+      "details": ""
+    },
+    {
+      "level": "ok",
+      "check": "ids",
+      "where": "",
+      "message": "all 27 ontology IDs exist and none are deprecated (39 uses in the diagram)",
+      "details": ""
+    },
+    {
+      "level": "note",
+      "check": "labels",
+      "where": "box 'Pseudopotential' (line 121)",
+      "message": "no label written next to IAO_0000030 (the ontology calls it 'information content entity')",
+      "details": ""
+    },
+    {
+      "level": "note",
+      "check": "labels",
+      "where": "box 'InteratomicPotential' (line 123)",
+      "message": "no label written next to IAO_0000030 (the ontology calls it 'information content entity')",
+      "details": ""
+    },
+    {
+      "level": "warning",
+      "check": "labels",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "text next to PMD_0000504 reads 'ab initio MD or', but the ontology calls it 'ab initio molecular dynamics simulation'",
+      "details": ""
+    },
+    {
+      "level": "warning",
+      "check": "labels",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "text next to PMD_0000631 reads 'empirical potential MD', but the ontology calls it 'empirical potential molecular dynamics simulation'",
+      "details": ""
+    },
+    {
+      "level": "ok",
+      "check": "labels",
+      "where": "",
+      "message": "35 labels match the ontology",
+      "details": ""
+    },
+    {
+      "level": "ok",
+      "check": "domain-range",
+      "where": "",
+      "message": "all 13 relation arrows fit their properties' domains and ranges (54 constraints checked, based on the asserted hierarchy, without a reasoner)",
+      "details": ""
+    },
+    {
+      "level": "note",
+      "check": "domain-range",
+      "where": "",
+      "message": "1 relation arrow uses a property without a domain or range, so there was nothing to check",
+      "details": ""
+    },
+    {
+      "level": "note",
+      "check": "vocabulary",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "SC (PMD_0000933) in 'ATOMISTIC_CALC_TYPE' is the same class as 'Simulation' itself ('simulation process'), so it adds no information",
+      "details": ""
+    },
+    {
+      "level": "ok",
+      "check": "vocabulary",
+      "where": "",
+      "message": "4 terms in 'ATOMISTIC_CALC_TYPE' are kinds of 'simulation process'",
+      "details": ""
+    }
+  ]
+}

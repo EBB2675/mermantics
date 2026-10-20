@@ -1,0 +1,33 @@
+Checked broken-a-unknown-id.mmd: 23 boxes, 37 arrows
+Ontology: .cache/pmdco-full-3.1.1.ttl
+Reasoner: not used (fast mode)
+
+Errors (1)
+  - [ids] box 'Software' (line 102): IAO_0099999 is not in the ontology
+      http://purl.obolibrary.org/obo/IAO_0099999
+
+Warnings (2)
+  - [labels] box 'ATOMISTIC_CALC_TYPE' (line 154): text next to PMD_0000504 reads 'ab initio MD or',
+    but the ontology calls it 'ab initio molecular dynamics simulation'
+  - [labels] box 'ATOMISTIC_CALC_TYPE' (line 154): text next to PMD_0000631 reads 'empirical
+    potential MD', but the ontology calls it 'empirical potential molecular dynamics simulation'
+
+Notes (5)
+  - [ids] arrow Simulation -> CalcType (line 196): arrow has no ontology ID, not checked
+    (calculation_type local vocabulary field)
+  - [labels] box 'Pseudopotential' (line 121): no label written next to IAO_0000030 (the ontology
+    calls it 'information content entity')
+  - [labels] box 'InteratomicPotential' (line 123): no label written next to IAO_0000030 (the
+    ontology calls it 'information content entity')
+  - [domain-range] 1 relation arrow uses a property without a domain or range, so there was nothing
+    to check
+  - [vocabulary] box 'ATOMISTIC_CALC_TYPE' (line 154): SC (PMD_0000933) in 'ATOMISTIC_CALC_TYPE' is
+    the same class as 'Simulation' itself ('simulation process'), so it adds no information
+
+Passed (3)
+  - [labels] 34 labels match the ontology
+  - [domain-range] all 13 relation arrows fit their properties' domains and ranges (54 constraints
+    checked, based on the asserted hierarchy, without a reasoner)
+  - [vocabulary] 4 terms in 'ATOMISTIC_CALC_TYPE' are kinds of 'simulation process'
+
+FAILED: 1 errors, 2 warnings, 5 notes

@@ -1,0 +1,21 @@
+{
+  "name": "mermantics-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:pmdco": "PMDCO=1 vitest run",
+    "typecheck": "tsc --noEmit -p tsconfig.test.json",
+    "fetch-pmdco": "node scripts/fetch-pmdco.mjs",
+    "golden:fast": "scripts/make-golden-fast.sh"
+  },
+  "devDependencies": {
+    "@types/n3": "^1.26.4",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  },
+  "dependencies": {
+    "n3": "^2.13.12"
+  }
+}
