@@ -1,0 +1,37 @@
+Checked broken-c-wrong-relation.mmd: 23 boxes, 38 arrows
+Ontology: .cache/pmdco-full-3.1.1.ttl
+Reasoner: not used (fast mode)
+
+Warnings (5)
+  - [labels] box 'ATOMISTIC_CALC_TYPE' (line 154): text next to PMD_0000504 reads 'ab initio MD or',
+    but the ontology calls it 'ab initio molecular dynamics simulation'
+  - [labels] box 'ATOMISTIC_CALC_TYPE' (line 154): text next to PMD_0000631 reads 'empirical
+    potential MD', but the ontology calls it 'empirical potential molecular dynamics simulation'
+  - [domain-range] arrow HPC -> Simulation (line 186): 'has specified input' expects its subject to
+    be 'completely executed planned process', but 'HPC' is not. OWL does not treat this as an error
+    by itself: a reasoner would quietly conclude that 'HPC' is one.
+  - [domain-range] arrow HPC -> Simulation (line 186): 'has specified input' expects its subject to
+    be 'occurrent' (inherited from 'participates in'), but 'HPC' is not. OWL does not treat this as
+    an error by itself: a reasoner would quietly conclude that 'HPC' is one.
+  - [domain-range] arrow HPC -> Simulation (line 186): 'has specified input' expects its object to
+    be 'continuant' (inherited from 'participates in'), but 'Simulation' is not. OWL does not treat
+    this as an error by itself: a reasoner would quietly conclude that 'Simulation' is one.
+
+Notes (5)
+  - [ids] arrow Simulation -> CalcType (line 198): arrow has no ontology ID, not checked
+    (calculation_type local vocabulary field)
+  - [labels] box 'Pseudopotential' (line 121): no label written next to IAO_0000030 (the ontology
+    calls it 'information content entity')
+  - [labels] box 'InteratomicPotential' (line 123): no label written next to IAO_0000030 (the
+    ontology calls it 'information content entity')
+  - [domain-range] 1 relation arrow uses a property without a domain or range, so there was nothing
+    to check
+  - [vocabulary] box 'ATOMISTIC_CALC_TYPE' (line 154): SC (PMD_0000933) in 'ATOMISTIC_CALC_TYPE' is
+    the same class as 'Simulation' itself ('simulation process'), so it adds no information
+
+Passed (3)
+  - [ids] all 27 ontology IDs exist and none are deprecated (40 uses in the diagram)
+  - [labels] 36 labels match the ontology
+  - [vocabulary] 4 terms in 'ATOMISTIC_CALC_TYPE' are kinds of 'simulation process'
+
+PASSED: 0 errors, 5 warnings, 5 notes

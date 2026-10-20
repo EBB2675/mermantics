@@ -1,0 +1,189 @@
+@prefix diagram: <http://example.org/diagram#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/diagram> a owl:Ontology .
+
+diagram:Activity_example a diagram:Activity,
+        owl:NamedIndividual ;
+    rdfs:label "Activity (example)" .
+
+diagram:Analysis_example a diagram:Analysis,
+        owl:NamedIndividual ;
+    rdfs:label "Analysis (example)" .
+
+diagram:CalcProp_example a diagram:CalcProp,
+        owl:NamedIndividual ;
+    rdfs:label "CalculatedProperty (example)" .
+
+diagram:Computation_example a diagram:Computation,
+        owl:NamedIndividual ;
+    rdfs:label "Computation (example)" .
+
+diagram:Context_example a diagram:Context,
+        owl:NamedIndividual ;
+    rdfs:label "Context (example)" .
+
+diagram:DFT_example a diagram:DFT,
+        owl:NamedIndividual ;
+    rdfs:label "DFT (example)" .
+
+diagram:EntityBase_example a diagram:EntityBase,
+        owl:NamedIndividual ;
+    rdfs:label "Entity (example)" .
+
+diagram:Experiment_example a diagram:Experiment,
+        owl:NamedIndividual ;
+    rdfs:label "Experiment (example)" .
+
+diagram:HPC_example a diagram:HPC,
+        owl:NamedIndividual ;
+    rdfs:label "HPC (example)" .
+
+diagram:Interatomic_example a diagram:Interatomic,
+        owl:NamedIndividual ;
+    rdfs:label "InteratomicPotential (example)" .
+
+diagram:MatEnt_example a diagram:MatEnt,
+        owl:NamedIndividual ;
+    rdfs:label "material entity (example)" .
+
+diagram:Material_example a diagram:Material,
+        owl:NamedIndividual ;
+    rdfs:label "material (example)" .
+
+diagram:Method_example a diagram:Method,
+        owl:NamedIndividual ;
+    rdfs:label "ComputationalMethod (example)" .
+
+diagram:ParameterSet_example a diagram:ParameterSet,
+        owl:NamedIndividual ;
+    rdfs:label "ParameterSet (example)" .
+
+diagram:Pseudo_example a diagram:Pseudo,
+        owl:NamedIndividual ;
+    rdfs:label "Pseudopotential (example)" .
+
+diagram:Root_example a diagram:Root,
+        owl:NamedIndividual ;
+    rdfs:label "Root / Thing / Entity (example)" .
+
+diagram:SimSettings_example a diagram:SimSettings,
+        owl:NamedIndividual ;
+    rdfs:label "SimulationSettings (example)" .
+
+diagram:SimSystem_example a diagram:SimSystem,
+        owl:NamedIndividual ;
+    rdfs:label "SimulatedSystem (example)" .
+
+diagram:Simulation_example a diagram:Simulation,
+        owl:NamedIndividual ;
+    rdfs:label "Simulation (example)" .
+
+diagram:Software_example a diagram:Software,
+        owl:NamedIndividual ;
+    rdfs:label "Software (example)" .
+
+diagram:ValueSpec_example a diagram:ValueSpec,
+        owl:NamedIndividual ;
+    rdfs:label "qudt scalar quantity value (example)" .
+
+diagram:WorkflowDef_example a diagram:WorkflowDef,
+        owl:NamedIndividual ;
+    rdfs:label "WorkflowDefinition (example)" .
+
+diagram:WorkflowRun_example a diagram:WorkflowRun,
+        owl:NamedIndividual ;
+    rdfs:label "WorkflowRun (example)" .
+
+diagram:Analysis a owl:Class ;
+    rdfs:label "Analysis" ;
+    rdfs:subClassOf diagram:Computation .
+
+diagram:CalcProp a owl:Class ;
+    rdfs:label "CalculatedProperty" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:DFT a owl:Class ;
+    rdfs:label "DFT" ;
+    rdfs:subClassOf diagram:Method .
+
+diagram:Experiment a owl:Class ;
+    rdfs:label "Experiment" ;
+    rdfs:subClassOf diagram:Activity .
+
+diagram:HPC a owl:Class ;
+    rdfs:label "HPC" ;
+    rdfs:subClassOf diagram:MatEnt .
+
+diagram:Interatomic a owl:Class ;
+    rdfs:label "InteratomicPotential" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:Material a owl:Class ;
+    rdfs:label "material" ;
+    rdfs:subClassOf diagram:MatEnt .
+
+diagram:Pseudo a owl:Class ;
+    rdfs:label "Pseudopotential" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:SimSettings a owl:Class ;
+    rdfs:label "SimulationSettings" ;
+    rdfs:subClassOf diagram:ParameterSet .
+
+diagram:SimSystem a owl:Class ;
+    rdfs:label "SimulatedSystem" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:Simulation a owl:Class ;
+    rdfs:label "Simulation" ;
+    rdfs:subClassOf diagram:Computation .
+
+diagram:Software a owl:Class ;
+    rdfs:label "Software" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:ValueSpec a owl:Class ;
+    rdfs:label "qudt scalar quantity value" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:WorkflowDef a owl:Class ;
+    rdfs:label "WorkflowDefinition" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:WorkflowRun a owl:Class ;
+    rdfs:label "WorkflowRun" ;
+    rdfs:subClassOf diagram:Computation .
+
+diagram:Method a owl:Class ;
+    rdfs:label "ComputationalMethod" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:ParameterSet a owl:Class ;
+    rdfs:label "ParameterSet" ;
+    rdfs:subClassOf diagram:Context .
+
+diagram:Activity a owl:Class ;
+    rdfs:label "Activity" ;
+    rdfs:subClassOf diagram:Root .
+
+diagram:EntityBase a owl:Class ;
+    rdfs:label "Entity" ;
+    rdfs:subClassOf diagram:Root .
+
+diagram:MatEnt a owl:Class ;
+    rdfs:label "material entity" ;
+    rdfs:subClassOf diagram:EntityBase .
+
+diagram:Root a owl:Class ;
+    rdfs:label "Root / Thing / Entity" .
+
+diagram:Computation a owl:Class ;
+    rdfs:label "Computation" ;
+    rdfs:subClassOf diagram:Activity .
+
+diagram:Context a owl:Class ;
+    rdfs:label "Context" ;
+    rdfs:subClassOf diagram:EntityBase .
+

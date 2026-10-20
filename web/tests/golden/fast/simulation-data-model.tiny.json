@@ -1,0 +1,307 @@
+{
+  "diagram": "simulation-data-model.mmd",
+  "passed": false,
+  "counts": {
+    "error": 39,
+    "warning": 0,
+    "note": 2,
+    "ok": 0
+  },
+  "info": {
+    "boxes": 23,
+    "arrows": 37,
+    "ontology_files": [
+      "../tests/fixtures/tiny.ttl"
+    ],
+    "reasoner": null
+  },
+  "findings": [
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Root / Thing / Entity' (line 27)",
+      "message": "BFO_0000001 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/BFO_0000001"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Activity' (line 33)",
+      "message": "BFO_0000015 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/BFO_0000015"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Computation' (line 35)",
+      "message": "PMD_0000583 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000583"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Entity' (line 47)",
+      "message": "BFO_0000002 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/BFO_0000002"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Context' (line 49)",
+      "message": "IAO_0000030 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000030"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'material entity' (line 61)",
+      "message": "BFO_0000040 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/BFO_0000040"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Simulation' (line 69)",
+      "message": "PMD_0000933 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000933"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Analysis' (line 71)",
+      "message": "PMD_0000583 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000583"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'WorkflowRun' (line 73)",
+      "message": "PMD_0000016 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000016"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ComputationalMethod' (line 83)",
+      "message": "PMD_0000931 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000931"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'SimulationSettings' (line 94)",
+      "message": "IAO_0000033 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000033"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Software' (line 102)",
+      "message": "IAO_0000010 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000010"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'WorkflowDefinition' (line 104)",
+      "message": "PMD_0000012 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000012"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'SimulatedSystem' (line 113)",
+      "message": "IAO_0000030 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000030"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'Pseudopotential' (line 121)",
+      "message": "IAO_0000030 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000030"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'InteratomicPotential' (line 123)",
+      "message": "IAO_0000030 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000030"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'CalculatedProperty' (line 132)",
+      "message": "IAO_0000027 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000027"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'qudt scalar quantity value' (line 134)",
+      "message": "PMD_0080205 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0080205"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'material' (line 143)",
+      "message": "PMD_0000000 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000000"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'HPC' (line 145)",
+      "message": "PMD_0000582 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000582"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "PMD_0000956 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000956"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "PMD_0000862 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000862"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "PMD_0000504 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000504"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "PMD_0000631 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000631"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "box 'ATOMISTIC_CALC_TYPE' (line 154)",
+      "message": "PMD_0000933 is not in the ontology",
+      "details": "https://w3id.org/pmd/co/PMD_0000933"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> SimSystem (line 162)",
+      "message": "OBI_0000293 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0000293"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> SimSystem (line 164)",
+      "message": "OBI_0000299 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0000299"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> Pseudo (line 168)",
+      "message": "OBI_0000293 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0000293"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> Interatomic (line 170)",
+      "message": "OBI_0000293 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0000293"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> CalcProp (line 174)",
+      "message": "OBI_0000299 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0000299"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> Method (line 178)",
+      "message": "RO_0000059 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/RO_0000059"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> SimSettings (line 180)",
+      "message": "RO_0000059 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/RO_0000059"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> Software (line 182)",
+      "message": "RO_0000059 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/RO_0000059"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> HPC (line 186)",
+      "message": "RO_0000057 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/RO_0000057"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow Simulation -> WorkflowRun (line 190)",
+      "message": "BFO_0000050 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/BFO_0000050"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow WorkflowRun -> WorkflowDef (line 192)",
+      "message": "RO_0000059 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/RO_0000059"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow CalcProp -> SimSystem (line 202)",
+      "message": "IAO_0000136 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000136"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow CalcProp -> ValueSpec (line 204)",
+      "message": "OBI_0001938 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/OBI_0001938"
+    },
+    {
+      "level": "error",
+      "check": "ids",
+      "where": "arrow SimSystem -> Material (line 208)",
+      "message": "IAO_0000136 is not in the ontology",
+      "details": "http://purl.obolibrary.org/obo/IAO_0000136"
+    },
+    {
+      "level": "note",
+      "check": "ids",
+      "where": "arrow Simulation -> CalcType (line 196)",
+      "message": "arrow has no ontology ID, not checked (calculation_type local vocabulary field)",
+      "details": ""
+    },
+    {
+      "level": "note",
+      "check": "vocabulary",
+      "where": "arrow Simulation -> CalcType (line 196)",
+      "message": "cannot check 'ATOMISTIC_CALC_TYPE': 'Simulation' has no ontology alignment",
+      "details": ""
+    }
+  ]
+}
