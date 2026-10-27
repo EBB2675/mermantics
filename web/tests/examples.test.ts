@@ -4,9 +4,9 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
-import { checks, defaultConfig, edit, mermaid } from "../src/core/index.js";
+import { checks, defaultConfig, edit, mermaid, type Ontology } from "../src/core/index.js";
 import { PMDCO_ENABLED, PMDCO_FILE, WEB, fixture, loadOntology } from "./helpers.js";
 
 const example = (name: string) => readFileSync(join(WEB, "examples", name), "utf8");
@@ -24,7 +24,11 @@ test("examples parse without findings and use the usual styles", () => {
 });
 
 describe.skipIf(!PMDCO_ENABLED)("examples on PMDco", () => {
-  const onto = loadOntology(PMDCO_FILE, "pmdco-full.ttl");
+  // Loaded here, not in the describe body, which runs even when the block is skipped.
+  let onto: Ontology;
+  beforeAll(() => {
+    onto = loadOntology(PMDCO_FILE, "pmdco-full.ttl");
+  });
   const run = (name: string) => checks.run(mermaid.parse(example(name)), onto, defaultConfig(), null).findings;
   const severe = (name: string) => run(name).filter((f) => f.level === "error" || f.level === "warning")
     .map((f) => `${f.level} ${f.check}: ${f.where}: ${f.message}`);
