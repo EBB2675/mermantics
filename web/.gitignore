@@ -4,3 +4,5 @@ dist/
 .cache/
 # Python environment for the reference CLI (pip install -e ..)
 .venv/
+# PMDco copied into the site by scripts/fetch-pmdco.mjs (before dev and build)
+public/ontology/
