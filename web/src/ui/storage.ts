@@ -28,3 +28,20 @@ export function saveDraft(draft: Draft): void {
     // ignore
   }
 }
+
+/** A small per-browser setting, such as the open tab. */
+export function loadSetting(name: string): string | null {
+  try {
+    return localStorage.getItem(`mermantics-web:${name}`);
+  } catch {
+    return null;
+  }
+}
+
+export function saveSetting(name: string, value: string): void {
+  try {
+    localStorage.setItem(`mermantics-web:${name}`, value);
+  } catch {
+    // ignore
+  }
+}
