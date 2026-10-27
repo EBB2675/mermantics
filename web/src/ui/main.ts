@@ -2,6 +2,9 @@
 
 import "./style.css";
 
+import favicon from "../../../assets/favicon.svg";
+import logo from "../../../assets/mermantics-logo.svg";
+
 import simulation from "../../examples/simulation-example.mmd?raw";
 import brokenA from "../../examples/broken-unknown-id.mmd?raw";
 import brokenB from "../../examples/broken-impossible-class.mmd?raw";
@@ -422,6 +425,9 @@ $("#onto-default").addEventListener("click", () => void loadOntology(PMDCO));
 
 // ---- start ---------------------------------------------------------------------------------
 
+// Imported here rather than linked in index.html, so the paths also work under npm run dev.
+$<HTMLImageElement>("#logo").src = logo;
+$<HTMLLinkElement>("#favicon").href = favicon;
 $("#app-version").textContent = `mermantics-web ${__APP_VERSION__}`;
 showDocName();
 setTab(tab);
