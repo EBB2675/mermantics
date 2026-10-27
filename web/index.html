@@ -15,6 +15,7 @@
           <select id="examples" aria-label="Load an example">
             <option value="" selected>Examples...</option>
           </select>
+          <button id="new" type="button" title="Start from an empty diagram with the usual styles">New diagram</button>
           <button id="open" type="button">Open diagram...</button>
           <button id="save" type="button" title="Save the editor text as a .mmd file (Ctrl+S)">Download diagram</button>
         </div>
@@ -30,10 +31,14 @@
     <main class="layout">
       <section class="pane editor-pane">
         <div class="pane-head">
-          <h2>Diagram</h2>
+          <div class="tabs" role="tablist" aria-label="Edit the diagram as">
+            <button id="tab-forms" type="button" role="tab" aria-selected="true">Boxes and arrows</button>
+            <button id="tab-text" type="button" role="tab" aria-selected="false">Text</button>
+          </div>
           <span id="docname" class="docname"></span>
         </div>
-        <div id="editor" class="editor"></div>
+        <div id="forms" class="forms"></div>
+        <div id="editor" class="editor" hidden></div>
       </section>
 
       <section class="pane preview-pane" id="preview">

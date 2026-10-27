@@ -3,6 +3,8 @@
  * and each arrow `data-id="L_<src>_<dst>_<k>"`, where k counts all arrows, not those
  * between one pair. So an arrow is found by its two ends and its place among the arrows
  * between them, both in the diagram text and in the SVG.
+ *
+ * Arrows are thin, so each one gets a wider transparent copy on top that takes the clicks.
  */
 
 import type { Mermaid } from "mermaid";
@@ -42,13 +44,21 @@ export class Preview {
   private scale = 1; // 0 = fit to width
   private onRendered: (text: string) => void = () => {};
 
-  constructor(private readonly root: HTMLElement, private readonly onNodeClick: (nodeId: string) => void) {
+  constructor(private readonly root: HTMLElement, private readonly onNodeClick: (nodeId: string) => void,
+              private readonly onEdgeClick: (dataId: string) => void) {
     this.canvas = root.querySelector(".preview-canvas")!;
     this.message = root.querySelector(".preview-message")!;
     this.canvas.addEventListener("click", (event) => {
-      const node = (event.target as Element).closest("g.node");
+      const target = event.target as Element;
+      const node = target.closest("g.node");
       const id = node && this.nodeIdOf(node);
-      if (id) this.onNodeClick(id);
+      if (id) {
+        this.onNodeClick(id);
+        return;
+      }
+      const edge = target.closest("[data-hit-for]")?.getAttribute("data-hit-for")
+        ?? target.closest(".edgeLabel .label[data-id]")?.getAttribute("data-id");
+      if (edge) this.onEdgeClick(edge);
     });
     root.querySelector(".zoom-in")!.addEventListener("click", () => this.zoom(1.25));
     root.querySelector(".zoom-out")!.addEventListener("click", () => this.zoom(0.8));
@@ -91,6 +101,7 @@ export class Preview {
       bindFunctions?.(this.canvas);
       this.svgId = id;
       this.indexNodes();
+      this.addEdgeHits();
       this.applyScale();
       if (this.recenter) {
         this.recenter = false;
@@ -127,13 +138,32 @@ export class Preview {
     }
   }
 
-  private edgeEls(ref: EdgeRef): Element[] {
+  private addEdgeHits() {
+    for (const path of this.canvas.querySelectorAll("path[data-id]")) {
+      const hit = document.createElementNS("http://www.w3.org/2000/svg", "path");
+      hit.setAttribute("d", path.getAttribute("d") ?? "");
+      hit.setAttribute("class", "edge-hit");
+      hit.setAttribute("data-hit-for", path.getAttribute("data-id")!);
+      path.after(hit);
+    }
+  }
+
+  private edgePath(ref: EdgeRef): Element | undefined {
     const prefix = `L_${ref.src}_${ref.dst}_`;
     const paths = [...this.canvas.querySelectorAll("path[data-id]")].filter((p) => {
       const dataId = p.getAttribute("data-id")!;
       return dataId.startsWith(prefix) && /^\d+$/.test(dataId.slice(prefix.length));
     });
-    const path = paths[ref.nth];
+    return paths[ref.nth];
+  }
+
+  /** The SVG data-id of an arrow, to tell which arrow a click was on. */
+  dataIdOf(ref: EdgeRef): string | null {
+    return this.edgePath(ref)?.getAttribute("data-id") ?? null;
+  }
+
+  private edgeEls(ref: EdgeRef): Element[] {
+    const path = this.edgePath(ref);
     if (!path) return [];
     const label = this.canvas.querySelector(`.edgeLabel .label[data-id="${path.getAttribute("data-id")}"]`);
     return label ? [path, label.closest(".edgeLabel")!] : [path];

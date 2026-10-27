@@ -1,6 +1,7 @@
 /** The diagram editor: CodeMirror 6 with marks on the lines that have findings. */
 
-import { EditorState, RangeSetBuilder, StateEffect, StateField } from "@codemirror/state";
+import { isolateHistory, redo, undo } from "@codemirror/commands";
+import { EditorState, RangeSetBuilder, StateEffect, StateField, Transaction } from "@codemirror/state";
 import { Decoration, EditorView, type DecorationSet } from "@codemirror/view";
 import { basicSetup } from "codemirror";
 
@@ -72,6 +73,28 @@ export class Editor {
   /** Replace the whole text, with a fresh undo history (a new file or example). */
   setText(text: string): void {
     this.view.setState(this.state(text));
+  }
+
+  /** Apply an edit from the forms as one undo step of its own. */
+  apply(changes: { from: number; to: number; insert: string }[]): void {
+    if (!changes.length) return;
+    this.view.dispatch({
+      changes,
+      annotations: [isolateHistory.of("full"), Transaction.userEvent.of("input.form")],
+    });
+  }
+
+  undo(): boolean {
+    return undo(this.view);
+  }
+
+  redo(): boolean {
+    return redo(this.view);
+  }
+
+  /** Measure the layout again, after the editor was hidden. */
+  refresh(): void {
+    this.view.requestMeasure();
   }
 
   setMarks(lines: Map<number, LineLevel>): void {

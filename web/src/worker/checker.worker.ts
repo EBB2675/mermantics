@@ -1,16 +1,18 @@
 /**
  * Owns the ontology store and runs the checks, so the page never freezes while
- * parsing the ontology or checking a large diagram. Requests are handled one at a time,
- * in the order they arrive.
+ * parsing the ontology or checking a large diagram. Loads and checks are handled one at a
+ * time, in the order they arrive. Term searches are answered at once from the index of the
+ * current ontology, so typing in a search field does not wait for a check or a download.
  */
 
 import { DataFactory } from "n3";
 
-import { checks, defaultConfig, mermaid, Ontology, report } from "../core/index.js";
+import { checks, DEFAULT_PREFIXES, defaultConfig, mermaid, Ontology, report, terms } from "../core/index.js";
 import { OWL, RDF } from "../core/ontology.js";
 import type { OntologyInfo, Request, Response } from "./protocol.js";
 
 let onto: Ontology | null = null;
+let index: terms.TermIndex | null = null;
 let queue: Promise<void> = Promise.resolve();
 
 function post(message: Response) {
@@ -39,9 +41,11 @@ async function load(request: Extract<Request, { type: "load" }>): Promise<Ontolo
   }
   // Only replace the current ontology once the new one has parsed.
   const loaded = Ontology.fromTurtle([{ name: request.name, text }]);
+  const loadedIndex = terms.TermIndex.build(loaded, DEFAULT_PREFIXES);
   onto = loaded;
+  index = loadedIndex;
   return { name: request.name, title: request.title, version: versionOf(loaded), triples: loaded.store.size,
-           ms: performance.now() - start };
+           terms: loadedIndex.size, ms: performance.now() - start };
 }
 
 function check(request: Extract<Request, { type: "check" }>) {
@@ -64,13 +68,30 @@ function check(request: Extract<Request, { type: "check" }>) {
 
 async function handle(request: Request) {
   try {
-    if (request.type === "load") post({ type: "loaded", id: request.id, ontology: await load(request) });
-    else post({ type: "checked", id: request.id, checked: check(request) });
+    switch (request.type) {
+      case "load":
+        post({ type: "loaded", id: request.id, ontology: await load(request) });
+        break;
+      case "check":
+        post({ type: "checked", id: request.id, checked: check(request) });
+        break;
+      case "search": {
+        const result = index?.search(request.query, { kinds: request.kinds, limit: request.limit })
+          ?? { terms: [], total: 0 };
+        post({ type: "found", id: request.id, result });
+        break;
+      }
+      case "terms":
+        post({ type: "terms", id: request.id, terms: request.ids.map((id) => index?.get(id) ?? null) });
+        break;
+    }
   } catch (exc) {
     post({ type: "error", id: request.id, request: request.type, message: (exc as Error).message });
   }
 }
 
 self.onmessage = (event: MessageEvent<Request>) => {
-  queue = queue.then(() => handle(event.data));
+  const request = event.data;
+  if (request.type === "search" || request.type === "terms") void handle(request);
+  else queue = queue.then(() => handle(request));
 };
