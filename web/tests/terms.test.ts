@@ -1,6 +1,6 @@
 // Term search for the form editor, on tiny.ttl and (with PMDCO=1) on PMDco.
 
-import { describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 import { DEFAULT_PREFIXES, terms } from "../src/core/index.js";
 import { PMDCO_ENABLED, PMDCO_FILE, loadOntology, loadTiny } from "./helpers.js";
@@ -60,11 +60,18 @@ describe("tiny.ttl", () => {
 });
 
 describe.skipIf(!PMDCO_ENABLED)("PMDco", () => {
-  const start = performance.now();
-  const onto = loadOntology(PMDCO_FILE, "pmdco-full.ttl");
-  const parsed = performance.now();
-  const index = terms.TermIndex.build(onto, DEFAULT_PREFIXES);
-  const built = performance.now();
+  // Loaded here, not in the describe body, which runs even when the block is skipped.
+  let index: terms.TermIndex;
+  let parsed = 0;
+  let built = 0;
+  let start = 0;
+  beforeAll(() => {
+    start = performance.now();
+    const onto = loadOntology(PMDCO_FILE, "pmdco-full.ttl");
+    parsed = performance.now();
+    index = terms.TermIndex.build(onto, DEFAULT_PREFIXES);
+    built = performance.now();
+  });
 
   test("index builds quickly", () => {
     console.log(`PMDco: parse ${Math.round(parsed - start)} ms, index ${Math.round(built - parsed)} ms, ` +
