@@ -53,11 +53,25 @@ export function rstrip(text: string, chars?: string): string {
   return cps.slice(0, j).join("");
 }
 
+const LINE_BREAK = "\\r\\n|[\\n\\r\\v\\f\\x1c\\x1d\\x1e\\x85\\u2028\\u2029]";
+
 /** str.splitlines() */
 export function splitlines(text: string): string[] {
-  const parts = text.split(/\r\n|[\n\r\v\f\x1c\x1d\x1e\x85\u2028\u2029]/u);
+  const parts = text.split(new RegExp(LINE_BREAK, "u"));
   if (parts[parts.length - 1] === "") parts.pop();
   return parts;
+}
+
+/** Where each line of `splitlines(text)` is in `text`: content [from, to), next line at `next`. */
+export function lineSpans(text: string): { from: number; to: number; next: number }[] {
+  const out: { from: number; to: number; next: number }[] = [];
+  let from = 0;
+  for (const m of text.matchAll(new RegExp(LINE_BREAK, "gu"))) {
+    out.push({ from, to: m.index, next: m.index + m[0].length });
+    from = m.index + m[0].length;
+  }
+  if (from < text.length) out.push({ from, to: text.length, next: text.length });
+  return out;
 }
 
 /** len() of a str: the number of code points. */

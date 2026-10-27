@@ -7,7 +7,7 @@
  */
 
 import { WARNING, finding, type Edge, type Finding, type Node } from "./model.js";
-import { S, W, W_MEMBERS, rstrip, splitlines, strip } from "./py.js";
+import { S, W, W_MEMBERS, lstrip, rstrip, splitlines, strip } from "./py.js";
 
 const WORD = `[${W_MEMBERS}]+`; // Python \w+
 const CSS = `[${W_MEMBERS}-]+`; // Python [\w-]+
@@ -19,7 +19,8 @@ const SKIP_RE = new RegExp(
   `|subgraph(?!${W}).*|end|direction${S}+${WORD}|accTitle${S}*:.*|accDescr(?!${W}).*)$`,
   "u",
 );
-const CLASS_STMT_RE = new RegExp(`^class${S}+(${ID}(?:${S}*,${S}*${ID})*)${S}+(${CSS})${S}*;?$`, "u");
+const CLASS_STMT_RE = new RegExp(`^class${S}+(${ID}(?:${S}*,${S}*${ID})*)${S}+(${CSS})${S}*;?$`, "du");
+const ID_RE_G = new RegExp(ID, "gu");
 
 // Node shapes as [opening, closing] pairs. Longer markers first.
 const SHAPES: [string, string][] = [
@@ -46,11 +47,48 @@ const NODE_ID_RE = new RegExp(`^(${ID})${S}*`, "u");
 const NODE_TAIL_RE = new RegExp(`^(?::::(${CSS}))?$`, "u");
 const ARROW_CSS_RE = new RegExp(`^:::${CSS}`, "u");
 const INHERIT_ARROW_RE = /^-{2,}>$/u;
+const LABEL_GROUPS = ["l1", "l2", "l3", "l4", "l5", "l6"] as const;
 
 export interface Diagram {
   nodes: Map<string, Node>;
   edges: Edge[];
   findings: Finding[];
+}
+
+/** [start, end) offsets in a line. */
+export type Span = [number, number];
+
+/** A node definition, with where its parts are in the (stripped) line. */
+export interface NodeMatch {
+  id: string;
+  label: string;
+  css: string | undefined;
+  idSpan: Span;
+  bodySpan: Span; // between the shape's brackets, quotes included
+  closeEnd: number; // just after the closing bracket
+  cssSpan: Span | null; // `:::name`
+}
+
+/** An arrow, with where its parts are in the (stripped) line. */
+export interface EdgeMatch {
+  src: string;
+  dst: string;
+  kind: Edge["kind"];
+  label: string;
+  arrow: string;
+  srcCss: string | undefined; // `A:::name --> B`
+  dstCss: string | undefined;
+  srcSpan: Span;
+  dstSpan: Span;
+  connectorSpan: Span; // between the source (and its :::css) and the target
+  labelSpan: Span | null; // the label as written, quotes included
+  pipeLabel: boolean; // written as -->|label|
+}
+
+/** A `class A,B name` statement. */
+export interface ClassMatch {
+  ids: { id: string; span: Span }[];
+  css: string;
 }
 
 function unquote(text: string): string {
@@ -59,26 +97,76 @@ function unquote(text: string): string {
   return text;
 }
 
-function parseNode(line: string): [string, string, string | undefined] | null {
+/** Leading whitespace (as Python's strip sees it) in UTF-16 code units. */
+function leading(text: string): number {
+  return text.length - lstrip(text).length;
+}
+
+/** True for lines that carry no model information (comments, styles, headers, ...). */
+export function isSkipped(line: string): boolean {
+  return SKIP_RE.test(line);
+}
+
+export function matchClassStatement(line: string): ClassMatch | null {
+  const m = CLASS_STMT_RE.exec(line);
+  if (!m) return null;
+  const start = m.indices![1]![0];
+  const ids = [...m[1]!.matchAll(ID_RE_G)].map((im) => ({
+    id: im[0], span: [start + im.index, start + im.index + im[0].length] as Span,
+  }));
+  return { ids, css: m[2]! };
+}
+
+export function matchEdge(line: string): EdgeMatch | null {
+  const m = EDGE_RE.exec(line);
+  if (!m) return null;
+  const g = m.groups!;
+  const indices = m.indices!.groups!;
+  const key = LABEL_GROUPS.find((k) => g[k]);
+  const label = unquote(key ? g[key]! : "");
+  const arrow = strip(line.slice(indices.src![1], indices.dst![0]));
+  const arrowCore = strip(arrow.replace(ARROW_CSS_RE, ""));
+  const kind = INHERIT_ARROW_RE.test(arrowCore) ? "inherit" : "relation";
+  return {
+    src: g.src!, dst: g.dst!, kind, label, arrow: arrowCore, srcCss: g.src_css, dstCss: g.dst_css,
+    srcSpan: indices.src!, dstSpan: indices.dst!,
+    connectorSpan: [(indices.src_css ?? indices.src!)[1], indices.dst![0]],
+    labelSpan: key ? indices[key]! : null,
+    pipeLabel: key === "l2" || key === "l4" || key === "l6",
+  };
+}
+
+export function matchNode(line: string): NodeMatch | null {
   const m = NODE_ID_RE.exec(line);
   if (!m) return null;
   const nodeId = m[1]!;
-  const rest = line.slice(m[0].length);
+  const offset = m[0].length;
+  const rest = line.slice(offset);
   for (const [opening, closing] of SHAPES) {
     if (!rest.startsWith(opening)) continue;
     const end = rest.lastIndexOf(closing);
     if (end < opening.length) continue;
     const body = rest.slice(opening.length, end);
-    const tail = strip(rstrip(strip(rest.slice(end + closing.length)), ";"));
+    const after = rest.slice(end + closing.length);
+    const tail = strip(rstrip(strip(after), ";"));
     const tm = NODE_TAIL_RE.exec(tail);
     if (tm === null) continue;
-    return [nodeId, unquote(body), tm[1]];
+    const closeEnd = offset + end + closing.length;
+    const css = tm[1];
+    const cssStart = closeEnd + leading(after);
+    return {
+      id: nodeId, label: unquote(body), css,
+      idSpan: [0, nodeId.length],
+      bodySpan: [offset + opening.length, offset + end],
+      closeEnd,
+      cssSpan: css === undefined ? null : [cssStart, cssStart + 3 + css.length],
+    };
   }
   return null;
 }
 
 /** Return the index of the first line after a YAML frontmatter block (or 0). */
-function stripFrontmatter(lines: string[]): number {
+export function stripFrontmatter(lines: string[]): number {
   let i = 0;
   while (i < lines.length && !strip(lines[i]!)) i++;
   if (i < lines.length && strip(lines[i]!) === "---") {
@@ -99,34 +187,26 @@ export function parse(text: string): Diagram {
   for (let index = start; index < lines.length; index++) {
     const number = index + 1;
     const line = strip(lines[index]!);
-    if (!line || SKIP_RE.test(line)) continue;
+    if (!line || isSkipped(line)) continue;
 
-    let m = CLASS_STMT_RE.exec(line);
-    if (m) {
-      const ids = m[1]!.split(",").map((x) => strip(x));
-      pendingCss.push([ids, m[2]!, number]);
+    const stmt = matchClassStatement(line);
+    if (stmt) {
+      pendingCss.push([stmt.ids.map((x) => x.id), stmt.css, number]);
       continue;
     }
 
-    m = EDGE_RE.exec(line);
-    if (m) {
-      const g = m.groups!;
-      const label = unquote(["l1", "l2", "l3", "l4", "l5", "l6"].map((k) => g[k]).find((v) => v) ?? "");
-      const indices = m.indices!.groups!;
-      const arrow = strip(line.slice(indices.src![1], indices.dst![0]));
-      const arrowCore = strip(arrow.replace(ARROW_CSS_RE, ""));
-      const kind = INHERIT_ARROW_RE.test(arrowCore) ? "inherit" : "relation";
-      diagram.edges.push({ src: g.src!, dst: g.dst!, kind, label, line: number, arrow: arrowCore });
-      for (const end of ["src", "dst"] as const) {
-        const css = g[`${end}_css`];
-        if (css) edgeCss.push([g[end]!, css]);
-      }
+    const edge = matchEdge(line);
+    if (edge) {
+      const { src, dst, kind, label, arrow } = edge;
+      diagram.edges.push({ src, dst, kind, label, line: number, arrow });
+      if (edge.srcCss) edgeCss.push([src, edge.srcCss]);
+      if (edge.dstCss) edgeCss.push([dst, edge.dstCss]);
       continue;
     }
 
-    const node = parseNode(line);
+    const node = matchNode(line);
     if (node) {
-      const [nodeId, label, css] = node;
+      const { id: nodeId, label, css } = node;
       const existing = diagram.nodes.get(nodeId);
       if (existing && existing.defined) {
         diagram.findings.push(finding(
