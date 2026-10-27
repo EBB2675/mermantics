@@ -1,0 +1,53 @@
+flowchart TB
+
+%% An example data model for simulations, aligned to PMDco.
+%% Solid arrows: inheritance (Parent --> Child).
+%% Dotted arrows: relations between instances, with the property ID.
+
+    %% Shared classes
+
+    Activity["<b>Activity</b><br>BFO_0000015 process"]:::base
+    Computation["<b>Computation</b><br>PMD_0000583 computing process"]:::base
+    Activity --> Computation
+
+    Entity["<b>Entity</b><br>BFO_0000002 continuant"]:::base
+    Information["<b>Information</b><br>IAO_0000030 information content entity"]:::base
+    MaterialEntity["<b>material entity</b><br>BFO_0000040"]:::upper
+    Entity --> Information
+    Entity --> MaterialEntity
+
+    %% The simulation and what it uses and produces
+
+    Simulation["<b>Simulation</b><br>PMD_0000933 simulation process<br><br>walltime, n_cores"]:::local
+    Analysis["<b>Analysis</b><br>PMD_0000583 computing process"]:::local
+    Computation --> Simulation
+    Computation --> Analysis
+
+    System["<b>SimulatedSystem</b><br>IAO_0000030 information content entity<br><br>n_atoms, formula"]:::local
+    Result["<b>Result</b><br>IAO_0000027 data entity<br><br>value + unit"]:::local
+    Software["<b>Software</b><br>IAO_0099999 software<br><br>name, version"]:::local
+    Information --> System
+    Information --> Result
+    Information --> Software
+
+    HPC["<b>HPC</b><br>PMD_0000582 computing device"]:::local
+    MaterialEntity --> HPC
+
+    CalcType["<b>Calculation type</b><br>MC: PMD_0000862 Monte Carlo simulation<br>OPT: PMD_0000956 structural optimization simulation"]:::vocab
+
+    Simulation -. "has specified input<br>OBI_0000293" .-> System
+    Simulation -. "has specified output<br>OBI_0000299" .-> Result
+    Simulation -. "concretizes<br>RO_0000059" .-> Software
+    Simulation -. "has participant<br>RO_0000057" .-> HPC
+    Simulation -. "calculation_type" .-> CalcType
+    Analysis -. "has specified input<br>OBI_0000293" .-> Result
+    Result -. "is about<br>IAO_0000136" .-> System
+
+    Note["<b>How to read</b><br>Grey: shared classes<br>Blue: local classes<br>Purple: a vocabulary<br>Solid arrows: inheritance<br>Dotted arrows: relations"]:::note
+
+    classDef base fill:#e5e7eb,stroke:#6b7280,stroke-width:2px,color:#111827
+    classDef upper fill:#ffffff,stroke:#9ca3af,stroke-width:2px,color:#374151
+    classDef local fill:#dbeafe,stroke:#1d4ed8,stroke-width:2px,color:#0f172a
+    classDef section fill:#ecfdf5,stroke:#059669,stroke-dasharray:4 2,color:#0f172a
+    classDef vocab fill:#f5f3ff,stroke:#7c3aed,color:#0f172a
+    classDef note fill:#ffffff,stroke:#9ca3af,color:#374151
