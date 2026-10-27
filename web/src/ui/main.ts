@@ -2,10 +2,10 @@
 
 import "./style.css";
 
-import simulation from "../../../tests/fixtures/simulation-data-model.mmd?raw";
-import brokenA from "../../../tests/fixtures/broken-a-unknown-id.mmd?raw";
-import brokenB from "../../../tests/fixtures/broken-b-impossible-class.mmd?raw";
-import brokenC from "../../../tests/fixtures/broken-c-wrong-relation.mmd?raw";
+import simulation from "../../examples/simulation-example.mmd?raw";
+import brokenA from "../../examples/broken-unknown-id.mmd?raw";
+import brokenB from "../../examples/broken-impossible-class.mmd?raw";
+import brokenC from "../../examples/broken-wrong-relation.mmd?raw";
 import * as edit from "../core/edit.js";
 import { parse, type Diagram } from "../core/mermaid.js";
 import { defaultConfig, type Finding } from "../core/model.js";
@@ -19,10 +19,10 @@ import { Preview, type EdgeRef, type Highlights } from "./preview.js";
 import { loadDraft, loadSetting, saveDraft, saveSetting, type Draft } from "./storage.js";
 
 const EXAMPLES = [
-  { name: "simulation-data-model.mmd", title: "Simulation data model", text: simulation },
-  { name: "broken-a-unknown-id.mmd", title: "Broken: unknown ID", text: brokenA },
-  { name: "broken-b-impossible-class.mmd", title: "Broken: impossible class (full check only)", text: brokenB },
-  { name: "broken-c-wrong-relation.mmd", title: "Broken: wrong relation", text: brokenC },
+  { name: "simulation-example.mmd", title: "Simulation example", text: simulation },
+  { name: "broken-unknown-id.mmd", title: "Broken: unknown ID", text: brokenA },
+  { name: "broken-impossible-class.mmd", title: "Broken: impossible class (full check only)", text: brokenB },
+  { name: "broken-wrong-relation.mmd", title: "Broken: wrong relation", text: brokenC },
 ] as const;
 
 const PMDCO = {
