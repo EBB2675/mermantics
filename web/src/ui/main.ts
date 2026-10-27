@@ -106,7 +106,8 @@ const forms = new FormsPanel($("#forms"), {
   levels: findingLevels,
   select: (target) => {
     pendingSelect = target;
-    selectPending();
+    if (target) selectPending();
+    else preview.select(null);
   },
   showLine: (line) => {
     setTab("text");

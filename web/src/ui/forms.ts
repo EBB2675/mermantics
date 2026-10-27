@@ -12,6 +12,7 @@ import type { Diagram } from "../core/mermaid.js";
 import type { Config, Edge, Node } from "../core/model.js";
 import type { Term } from "../core/terms.js";
 import { h } from "./dom.js";
+import { icon, type IconName } from "./icons.js";
 import { TermPicker, type Search } from "./termpicker.js";
 
 export type Level = "error" | "warning";
@@ -45,9 +46,42 @@ function nodeTitle(node: Node): string {
   return labels.title(node.label, node.id);
 }
 
+/** A button with an icon and, unless `iconOnly`, its text. */
+function button(name: IconName, text: string, attrs: Record<string, string | boolean> = {}, iconOnly = false): HTMLButtonElement {
+  const b = h("button", { type: "button", ...attrs, ...(iconOnly ? { "aria-label": text, title: attrs.title ?? text } : {}) },
+              icon(name));
+  if (!iconOnly) b.append(h("span", {}, text));
+  return b;
+}
+
+/** Fill and border colours of each `classDef`, for the swatches next to the box types. */
+function classColours(text: string): Map<string, { fill: string; stroke: string }> {
+  const out = new Map<string, { fill: string; stroke: string }>();
+  for (const line of text.split("\n")) {
+    const m = /^\s*classDef\s+([\w,-]+)\s+(.*)$/.exec(line);
+    if (!m) continue;
+    const fill = /(?:^|[,;\s])fill:\s*([^,;\s]+)/.exec(m[2]!)?.[1] ?? "";
+    const stroke = /(?:^|[,;\s])stroke:\s*([^,;\s]+)/.exec(m[2]!)?.[1] ?? "";
+    for (const name of m[1]!.split(",")) if (name) out.set(name, { fill, stroke });
+  }
+  return out;
+}
+
 function field(label: string, control: HTMLElement, hint = ""): HTMLElement {
-  return h("label", { class: "field" }, h("span", { class: "field-label" }, label), control,
+  return h("label", { class: "field" }, label ? h("span", { class: "field-label" }, label) : null, control,
            hint ? h("span", { class: "hint" }, hint) : null);
+}
+
+/** A textarea that grows with its lines (up to a limit). */
+function autoGrow(area: HTMLTextAreaElement, min: number, max = 14): HTMLTextAreaElement {
+  const fit = () => (area.rows = Math.min(max, Math.max(min, area.value.split("\n").length + 1)));
+  area.addEventListener("input", fit);
+  queueMicrotask(fit);
+  return area;
+}
+
+function section(title: string, ...children: (HTMLElement | null)[]): HTMLElement {
+  return h("section", { class: "form-section" }, h("h4", {}, title), ...children);
 }
 
 function short(text: string, max = 110): string {
@@ -80,17 +114,18 @@ export class FormsPanel {
   constructor(private readonly root: HTMLElement, private readonly host: FormsHost, private readonly config: Config) {
     this.filter = h("input", { type: "search", placeholder: "Filter boxes and arrows", "aria-label": "Filter" });
     this.filter.addEventListener("input", () => this.renderList());
-    const add = h("button", { type: "button", class: "primary" }, "+ Box");
+    const add = button("plus", "Box", { class: "primary", title: "Add a box" });
     add.addEventListener("click", () => this.openBox(null));
-    const arrow = h("button", { type: "button" }, "+ Arrow");
+    const arrow = button("plus", "Arrow", { title: "Add an arrow" });
     arrow.addEventListener("click", () => this.openArrow(null));
-    const undo = h("button", { type: "button", title: "Undo the last change (Ctrl+Z)" }, "Undo");
+    const undo = button("undo", "Undo", { class: "ghost", title: "Undo the last change (Ctrl+Z)" }, true);
     undo.addEventListener("click", () => host.undo());
-    const redo = h("button", { type: "button", title: "Redo (Ctrl+Shift+Z)" }, "Redo");
+    const redo = button("redo", "Redo", { class: "ghost", title: "Redo (Ctrl+Shift+Z)" }, true);
     redo.addEventListener("click", () => host.redo());
     this.list = h("div", { class: "forms-list" });
     this.formBox = h("div", { class: "forms-form", hidden: true });
-    root.append(h("div", { class: "forms-bar" }, add, arrow, this.filter, h("span", { class: "spacer" }), undo, redo),
+    root.append(h("div", { class: "forms-bar" }, add, arrow,
+                  h("label", { class: "search-field" }, icon("search"), this.filter), undo, redo),
                 this.list, this.formBox);
   }
 
@@ -115,44 +150,56 @@ export class FormsPanel {
     const levels = this.host.levels();
     const q = this.filter.value.trim().toLowerCase();
     const matches = (...texts: string[]) => !q || texts.some((t) => t.toLowerCase().includes(q));
-    const dot = (level: Level | undefined) => h("span", { class: `dot ${level ?? ""}` });
+    const colours = classColours(this.host.text());
+    const card = (level: Level | undefined, top: HTMLElement[], bottom: string, open: () => void) => {
+      const b = h("button", { type: "button", class: `card ${level ? `has-${level}` : ""}` },
+        h("span", { class: "card-top" }, ...top), bottom ? h("span", { class: "card-sub" }, bottom) : null);
+      b.addEventListener("click", open);
+      return h("li", {}, b);
+    };
+    const swatch = (css: Set<string>) => {
+      const c = [...css].map((k) => colours.get(k)).find((x) => x);
+      return h("span", { class: "swatch", style: c ? `background:${c.fill};border-color:${c.stroke || c.fill}` : null });
+    };
 
-    const boxes = h("ul", { class: "items" });
+    const boxes = h("ul", { class: "cards" });
     for (const node of d.nodes.values()) {
       if (!matches(nodeTitle(node), node.id, labels.plain(node.label))) continue;
       const curies = labels.findCuries(node.label);
-      const vocab = this.isVocab(node.css);
-      const button = h("button", { type: "button", class: "item" },
-        dot(levels?.nodes.get(node.id)),
-        h("span", { class: "item-name" }, nodeTitle(node)),
-        h("span", { class: "item-id" }, node.id),
+      let sub: string;
+      if (this.isVocab(node.css)) sub = `${curies.length} term${curies.length === 1 ? "" : "s"}`;
+      else if (!node.defined) sub = "only in arrows, no box line yet";
+      else if (curies.length) {
+        const entry = edit.readBoxLabel(node.label, false)?.lines.find((l) => "curie" in l);
+        sub = entry && "curie" in entry && entry.label ? `${entry.curie} · ${entry.label}` : curies[0]!;
+      } else sub = "no ontology alignment";
+      boxes.append(card(levels?.nodes.get(node.id), [
+        swatch(node.css),
+        h("span", { class: "card-name" }, nodeTitle(node)),
         ...[...node.css].map((c) => h("span", { class: "chip" }, c)),
-        h("span", { class: "item-meta" },
-          vocab ? `${curies.length} term${curies.length === 1 ? "" : "s"}` : curies[0] ?? (node.defined ? "" : "only in arrows")));
-      button.addEventListener("click", () => this.openBox(node.id));
-      boxes.append(h("li", {}, button));
+      ], sub, () => this.openBox(node.id)));
     }
 
-    const arrows = h("ul", { class: "items" });
+    const arrows = h("ul", { class: "cards" });
     d.edges.forEach((e, i) => {
       const src = d.nodes.get(e.src)!;
       const dst = d.nodes.get(e.dst)!;
-      const what = e.kind === "inherit" ? "is parent of" : labels.segments(e.label)[0] || "(no label)";
-      if (!matches(nodeTitle(src), nodeTitle(dst), e.src, e.dst, labels.plain(e.label), what)) return;
-      const button = h("button", { type: "button", class: "item" },
-        dot(levels?.edges.get(i)),
-        h("span", { class: "item-name" }, nodeTitle(src)),
-        h("span", { class: `arrow-kind ${e.kind}` }, what),
-        h("span", { class: "item-name" }, nodeTitle(dst)),
-        h("span", { class: "item-meta" }, labels.findCuries(e.label)[0] ?? ""));
-      button.addEventListener("click", () => this.openArrow(i));
-      arrows.append(h("li", {}, button));
+      const name = labels.segments(e.label)[0] ?? "";
+      if (!matches(nodeTitle(src), nodeTitle(dst), e.src, e.dst, labels.plain(e.label))) return;
+      const curie = labels.findCuries(e.label)[0];
+      const sub = e.kind === "inherit" ? "inheritance" : [name || "no label", curie].filter((x) => x).join(" · ");
+      arrows.append(card(levels?.edges.get(i), [
+        h("span", { class: "card-name" }, nodeTitle(src)),
+        h("span", { class: `card-arrow ${e.kind}` }, icon("arrow")),
+        h("span", { class: "card-name" }, nodeTitle(dst)),
+      ], sub, () => this.openArrow(i)));
     });
 
+    const heading = (title: string, n: number) => h("h3", { class: "list-head" }, title, h("span", { class: "count" }, String(n)));
     this.list.replaceChildren(
-      h("h3", {}, `Boxes (${boxes.children.length})`),
+      heading("Boxes", boxes.children.length),
       boxes.children.length ? boxes : h("p", { class: "empty" }, q ? "No box matches." : "No boxes yet. Add one with + Box."),
-      h("h3", {}, `Arrows (${arrows.children.length})`),
+      heading("Arrows", arrows.children.length),
       arrows.children.length ? arrows : h("p", { class: "empty" }, q ? "No arrow matches." : "No arrows yet."));
   }
 
@@ -198,11 +245,12 @@ export class FormsPanel {
 
   private formShell(title: string, body: HTMLElement[], actions: HTMLElement[]): { form: HTMLFormElement; error: HTMLElement } {
     const error = h("p", { class: "form-error", hidden: true, role: "alert" });
-    const close = h("button", { type: "button", class: "close", "aria-label": "Close" }, "×");
-    close.addEventListener("click", () => this.closeForm());
+    const back = button("back", "Boxes and arrows", { class: "back" });
+    back.addEventListener("click", () => this.closeForm());
     const form = h("form", { class: "edit-form", novalidate: true },
-      h("div", { class: "form-head" }, h("h3", {}, title), close),
-      ...body, error, h("div", { class: "form-actions" }, ...actions));
+      h("div", { class: "form-head" }, back, h("h3", {}, title)),
+      h("div", { class: "form-body" }, ...body, error),
+      h("div", { class: "form-actions" }, ...actions));
     form.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && !event.defaultPrevented) this.closeForm();
     });
@@ -217,7 +265,7 @@ export class FormsPanel {
     if (id !== null && !node) return;
     const info = id === null ? null : edit.boxInfo(text, id, this.config)!;
     new BoxForm(this, this.host, this.config, info, node ?? null);
-    if (id !== null) this.host.select({ nodeId: id });
+    this.host.select(id === null ? null : { nodeId: id });
   }
 
   /** Open the arrow form: for a new arrow (null) or one in the diagram, by index. */
@@ -225,7 +273,7 @@ export class FormsPanel {
     const edge = index === null ? null : this.host.diagram().edges[index] ?? null;
     if (index !== null && !edge) return;
     new ArrowForm(this, this.host, this.config, index, edge, from);
-    if (index !== null) this.host.select({ edgeIndex: index });
+    this.host.select(index === null ? null : { edgeIndex: index });
   }
 
   // Shared with the form classes below.
@@ -276,42 +324,60 @@ class BoxForm {
     this.idInput.addEventListener("input", () => (this.idEdited = true));
 
     const kinds = [...new Set([...edit.styleClasses(text), ...USUAL_KINDS, ...(this.kind ? [this.kind] : [])])];
-    const kindSelect = h("select", {}, h("option", { value: "" }, "(none)"),
-      ...kinds.map((k) => h("option", { value: k, selected: k === this.kind }, k)));
-    kindSelect.addEventListener("change", () => {
-      const label = this.label();
-      this.kind = kindSelect.value || null;
-      this.load(label);
-      this.render();
-    });
+    const colours = classColours(text);
+    const kindHelp = h("span", { class: "hint" });
     const other = info?.otherClasses ?? [];
-    const kindHint = other.length ? `Also styled ${other.join(", ")} elsewhere in the text (class statements or arrows).`
-      : "local: your class, vocab: a vocabulary, note: ignored by the checks.";
+    const describe = () => {
+      const k = this.kind;
+      let help = !k ? "No box type: drawn in the default style, checked like any box."
+        : config.vocabClasses.has(k) ? "A vocabulary: its terms are checked to be kinds of the box that points at it."
+        : config.skipClasses.has(k) ? "A note or legend: the checks ignore this box."
+        : "Sets the colour only; the box is checked like any other.";
+      if (other.length) help += ` Also styled ${other.join(", ")} elsewhere in the text.`;
+      kindHelp.textContent = help;
+    };
+    const pills = h("div", { class: "pills", role: "radiogroup", "aria-label": "Box type" });
+    for (const k of ["", ...kinds]) {
+      const c = colours.get(k);
+      const radio = h("input", { type: "radio", name: "box-kind", value: k, checked: (this.kind ?? "") === k });
+      radio.addEventListener("change", () => {
+        const label = this.label();
+        this.kind = k || null;
+        this.load(label);
+        this.render();
+        describe();
+      });
+      pills.append(h("label", { class: "pill" }, radio,
+        h("span", { class: "swatch", style: c ? `background:${c.fill};border-color:${c.stroke || c.fill}` : null }),
+        k || "none"));
+    }
+    describe();
 
     const actions: HTMLElement[] = [h("button", { type: "submit", class: "primary" }, info ? "Save" : "Add box")];
-    const cancel = h("button", { type: "button" }, "Cancel");
+    const cancel = h("button", { type: "button", class: "ghost" }, "Cancel");
     cancel.addEventListener("click", () => panel.ui.close());
-    actions.push(cancel);
+    actions.push(cancel, h("span", { class: "grow" }));
     if (info) {
+      const arrow = button("arrow", "Arrow from this box", { class: "ghost", title: "Add an arrow starting at this box" }, true);
+      arrow.addEventListener("click", () => panel.openArrow(null, info.id));
+      actions.push(arrow);
       if (info.line !== null) {
-        const show = h("button", { type: "button", class: "link" }, `Show in text (line ${info.line})`);
+        const show = button("code", `Show in text (line ${info.line})`, { class: "ghost" }, true);
         show.addEventListener("click", () => host.showLine(info.line!));
         actions.push(show);
       }
-      const arrow = h("button", { type: "button", class: "link" }, "+ Arrow from this box");
-      arrow.addEventListener("click", () => panel.openArrow(null, info.id));
-      const remove = h("button", { type: "button", class: "danger" }, "Delete box");
+      const remove = button("trash", "Delete box", { class: "ghost danger" }, true);
       remove.addEventListener("click", () => this.remove());
-      actions.push(arrow, remove);
+      actions.push(remove);
     }
 
-    const title = info ? `Box ${node ? nodeTitle(node) : info.id}` : "New box";
+    const title = info ? (node ? nodeTitle(node) : info.id) : "New box";
     const { form, error } = panel.ui.shell(title, [
-      this.nameField,
-      this.content,
-      field("Kind", kindSelect, kindHint),
-      h("div", { class: "field" }, h("span", { class: "field-label" }, "Parents (inheritance arrows)"), this.parentsBox),
-      field("Box id", this.idInput, "Used in the arrows. Changing it renames the box everywhere."),
+      section("Label", this.nameField, this.content),
+      section("Box type", pills, kindHelp),
+      section("Parents", h("div", { class: "field" }, this.parentsBox,
+        h("span", { class: "hint" }, "Each parent is a solid inheritance arrow to this box."))),
+      section("Box id", field("", this.idInput, "Used in the arrows. Changing it renames the box everywhere.")),
     ], actions);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
@@ -415,7 +481,7 @@ class BoxForm {
     }
     alignment.append(picker.el);
 
-    const area = h("textarea", { rows: 4, placeholder: "e.g. walltime, n_cores, job_id" });
+    const area = autoGrow(h("textarea", { rows: 3, placeholder: "e.g. walltime, n_cores, job_id" }), 3);
     area.value = textLines().map((l) => l.text).join("\n");
     area.addEventListener("input", () => {
       const texts = area.value === "" ? [] : area.value.split("\n").map((t) => ({ text: t.trim() }));
@@ -489,7 +555,7 @@ class BoxForm {
     const self = this.info?.id;
     const chips = this.parents.map((p) => {
       const node = d.nodes.get(p);
-      const x = h("button", { type: "button", class: "icon", "aria-label": `Remove parent ${p}` }, "×");
+      const x = button("x", `Remove parent ${p}`, { class: "chip-x" }, true);
       x.addEventListener("click", () => {
         this.parents = this.parents.filter((q) => q !== p);
         this.renderParents();
@@ -498,7 +564,7 @@ class BoxForm {
     });
     const add = h("select", { "aria-label": "Add a parent" });
     this.panel.ui.nodeOptions(add, [...this.parents, ...(self ? [self] : [])]);
-    add.options[0]!.textContent = "Add a parent…";
+    add.options[0]!.textContent = "+ Add a parent…";
     add.addEventListener("change", () => {
       if (add.value) this.parents.push(add.value);
       this.renderParents();
@@ -543,7 +609,7 @@ class ArrowForm {
   private fields: edit.ArrowFields = { name: "", curie: "", lines: [] };
   private raw = "";
   private readonly ends = h("div", { class: "ends" });
-  private readonly relation = h("div", { class: "relation" });
+  private readonly relation = h("section", { class: "form-section relation" });
   private readonly srcSelect = h("select", { "aria-label": "From" });
   private readonly dstSelect = h("select", { "aria-label": "To" });
 
@@ -554,31 +620,32 @@ class ArrowForm {
     panel.ui.nodeOptions(this.srcSelect, [], edge?.src ?? from);
     panel.ui.nodeOptions(this.dstSelect, [], edge?.dst ?? "");
 
-    const kindRadios = h("div", { class: "radios" });
-    for (const [value, text] of [["relation", "Relation (dotted arrow)"], ["inherit", "Inheritance (solid arrow)"]] as const) {
+    const kindRadios = h("div", { class: "segmented", role: "radiogroup", "aria-label": "Arrow type" });
+    for (const [value, text] of [["relation", "Relation · dotted"], ["inherit", "Inheritance · solid"]] as const) {
       const radio = h("input", { type: "radio", name: "arrow-kind", value, checked: this.kind === value });
       radio.addEventListener("change", () => {
         this.kind = value;
         this.render();
       });
-      kindRadios.append(h("label", {}, radio, ` ${text}`));
+      kindRadios.append(h("label", {}, radio, h("span", {}, text)));
     }
 
     const actions: HTMLElement[] = [h("button", { type: "submit", class: "primary" }, edge ? "Save" : "Add arrow")];
-    const cancel = h("button", { type: "button" }, "Cancel");
+    const cancel = h("button", { type: "button", class: "ghost" }, "Cancel");
     cancel.addEventListener("click", () => panel.ui.close());
-    actions.push(cancel);
+    actions.push(cancel, h("span", { class: "grow" }));
     if (edge) {
-      const show = h("button", { type: "button", class: "link" }, `Show in text (line ${edge.line})`);
+      const show = button("code", `Show in text (line ${edge.line})`, { class: "ghost" }, true);
       show.addEventListener("click", () => host.showLine(edge.line));
-      const remove = h("button", { type: "button", class: "danger" }, "Delete arrow");
+      const remove = button("trash", "Delete arrow", { class: "ghost danger" }, true);
       remove.addEventListener("click", () => this.remove());
       actions.push(show, remove);
     }
 
-    const { form, error } = panel.ui.shell(edge ? "Arrow" : "New arrow",
-      [h("div", { class: "field" }, h("span", { class: "field-label" }, "Type"), kindRadios), this.ends, this.relation],
-      actions);
+    const d = host.diagram();
+    const title = edge ? `${nodeTitle(d.nodes.get(edge.src)!)} → ${nodeTitle(d.nodes.get(edge.dst)!)}` : "New arrow";
+    const { form, error } = panel.ui.shell(title,
+      [section("Type", kindRadios), section("Boxes", this.ends), this.relation], actions);
     form.addEventListener("submit", (event) => {
       event.preventDefault();
       this.submit(error);
@@ -617,7 +684,7 @@ class ArrowForm {
     const area = h("textarea", { rows: 3, spellcheck: false, class: "mono" });
     area.value = this.raw;
     area.addEventListener("input", () => (this.raw = area.value));
-    this.relation.replaceChildren(field("Label as written in the diagram", area,
+    this.relation.replaceChildren(h("h4", {}, "Relation"), field("Label as written in the diagram", area,
       "The form fields cannot hold this label exactly, so it is shown as written. Use <br> for a new line."));
   }
 
@@ -644,7 +711,7 @@ class ArrowForm {
         termStatus(this.host, f.curie, PROPERTY_KINDS), remove));
     }
     id.append(picker.el);
-    const more = h("textarea", { rows: 2, placeholder: "e.g. input system" });
+    const more = autoGrow(h("textarea", { rows: 2, placeholder: "e.g. input system" }), 2);
     more.value = f.lines.join("\n");
     more.addEventListener("input", () => {
       f.lines = more.value === "" ? [] : more.value.split("\n").map((t) => t.trim()).filter((t) => t);
@@ -656,6 +723,7 @@ class ArrowForm {
       this.render();
     });
     this.relation.replaceChildren(
+      h("h4", {}, "Relation"),
       h("div", { class: "field" }, h("span", { class: "field-label" }, "Ontology property"), id,
         h("span", { class: "hint" }, "Optional. Without an ID the arrow is a plain field, like calculation_type.")),
       field("Relation name", name, "Written above the ID; the property's label, so the label check passes."),
