@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>mermantics</title>
+    <meta name="description" content="Check a Mermaid data model against an OWL ontology, in the browser." />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon.svg" />
+  </head>
+  <body>
+    <header class="topbar">
+      <img class="logo" src="../assets/mermantics-logo.svg" alt="mermantics" />
+      <div class="toolbar">
+        <div class="group">
+          <select id="examples" aria-label="Load an example">
+            <option value="" selected>Examples...</option>
+          </select>
+          <button id="open" type="button">Open diagram...</button>
+          <button id="save" type="button" title="Save the editor text as a .mmd file (Ctrl+S)">Download diagram</button>
+        </div>
+        <div class="group">
+          <span class="label">Ontology:</span>
+          <span id="onto-status" class="onto-status">loading...</span>
+          <button id="onto-load" type="button" title="Use a Turtle file from your computer instead">Load your own...</button>
+          <button id="onto-default" type="button" hidden>Use PMDco 3.1.1</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="pane editor-pane">
+        <div class="pane-head">
+          <h2>Diagram</h2>
+          <span id="docname" class="docname"></span>
+        </div>
+        <div id="editor" class="editor"></div>
+      </section>
+
+      <section class="pane preview-pane" id="preview">
+        <div class="pane-head">
+          <h2>Preview</h2>
+          <div class="zoom">
+            <button class="zoom-out" type="button" aria-label="Zoom out">&minus;</button>
+            <button class="zoom-reset" type="button">100%</button>
+            <button class="zoom-fit" type="button">Fit</button>
+            <button class="zoom-in" type="button" aria-label="Zoom in">+</button>
+          </div>
+        </div>
+        <p class="preview-message" hidden></p>
+        <div class="preview-canvas"></div>
+      </section>
+
+      <section class="pane findings-pane">
+        <div class="pane-head">
+          <h2>Findings</h2>
+          <span id="check-status" class="check-status"></span>
+          <span class="actions">
+            <span title="The reasoner checks (schema and example data) are not in the web version yet. Run the command line tool without --fast for them.">
+              <button id="full-check" type="button" disabled>Run full check</button>
+            </span>
+            <span class="label">Download:</span>
+            <button id="report-md" type="button" title="Report as Markdown, like --report">Report .md</button>
+            <button id="report-json" type="button" title="Report as JSON, like --json">.json</button>
+            <button id="report-owl" type="button" title="Generated OWL as Turtle, like --emit-owl">OWL .ttl</button>
+          </span>
+        </div>
+        <p class="fast-note">
+          Fast checks only: IDs, labels, domain and range on the asserted hierarchy, and vocabularies.
+          They run as you type.
+        </p>
+        <div id="findings" class="findings"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span id="app-version"></span> &middot; <span id="onto-version"></span>
+    </footer>
+
+    <script type="module" src="./src/ui/main.ts"></script>
+  </body>
+</html>

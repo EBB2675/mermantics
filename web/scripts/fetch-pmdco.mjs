@@ -1,14 +1,17 @@
 // Download PMDco 3.1.1 (pmdco-full.ttl) into web/.cache/ for the PMDco tests and the
-// golden files. Same URL as PMDCO_URL in src/mermantics/ontology.py.
-// Usage (from web/): npm run fetch-pmdco
+// golden files, and copy it to public/ontology/ so the web page can load it.
+// Same URL as PMDCO_URL in src/mermantics/ontology.py.
+// Usage (from web/): npm run fetch-pmdco (also runs before npm run dev and npm run build)
 
-import { mkdir, rename, stat, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, rename, stat, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const VERSION = "3.1.1";
 const URL = `https://raw.githubusercontent.com/materialdigital/core-ontology/v${VERSION}/pmdco-full.ttl`;
-const target = join(dirname(fileURLToPath(import.meta.url)), "..", ".cache", `pmdco-full-${VERSION}.ttl`);
+const web = join(dirname(fileURLToPath(import.meta.url)), "..");
+const target = join(web, ".cache", `pmdco-full-${VERSION}.ttl`);
+const site = join(web, "public", "ontology", `pmdco-full-${VERSION}.ttl`);
 
 const existing = await stat(target).catch(() => null);
 if (existing && existing.size > 0) {
@@ -21,3 +24,7 @@ if (existing && existing.size > 0) {
   await rename(`${target}.part`, target);
   console.log(`downloaded ${URL}\n        to ${target}`);
 }
+
+await mkdir(dirname(site), { recursive: true });
+await copyFile(target, site);
+console.log(`copied to ${site}`);
