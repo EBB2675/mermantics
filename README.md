@@ -28,6 +28,17 @@ against the ontology it claims to align with (by default PMDco 3.1.1):
 When the reasoner finds a problem, the report includes its explanation: the chain of
 axioms that leads to the contradiction.
 
+## Web version
+
+**https://ebb2675.github.io/mermantics/** runs the checks in your browser, with nothing
+to install and nothing sent to a server. Write the diagram as Mermaid text or build it with
+forms (add boxes, search the ontology for IDs, connect them with arrows), see it drawn as you
+type, and click a finding to jump to the box or arrow it is about. It uses PMDco 3.1.1, or a
+Turtle file of your own.
+
+The web version runs the fast checks for now (1, 2, 4 and 5, like `--fast`); the reasoner
+checks are planned. The code is in [`web/`](web/README.md).
+
 ## Install
 
 ```bash
